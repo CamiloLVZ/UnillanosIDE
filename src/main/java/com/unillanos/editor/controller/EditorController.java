@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -85,6 +86,12 @@ public class EditorController {
         return kernel.getLoadedPlugins();
     }
 
+    public List<String> getMessageHistory() {
+        if (kernel.getMessageBus() == null) {
+            return Collections.emptyList();
+        }
+        return kernel.getMessageBus().getHistory();
+    }
 
     //  Bus de mensajes
     private void subscribeToMessageBus() {
