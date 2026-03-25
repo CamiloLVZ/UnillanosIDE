@@ -222,8 +222,10 @@ public class EditorFrame extends JFrame {
             txtArchivoInicial.setCaretPosition(0);
         });
 
-        controller.setOnError((title, msg) -> SwingUtilities.invokeLater(() ->
-                JOptionPane.showMessageDialog(this, msg, title, JOptionPane.ERROR_MESSAGE)));
+        controller.setOnError((title, msg) -> SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(this, msg, title, JOptionPane.ERROR_MESSAGE);
+            appendStatusMessage("Error: " + msg);
+        }));
 
         controller.setOnStatusMessage(msg -> SwingUtilities.invokeLater(() -> appendStatusMessage(msg)));
 
