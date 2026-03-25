@@ -23,7 +23,7 @@ public class EditorFrame extends JFrame {
 
     private JButton btnCargarArchivoInicial;
     private JTextArea txtArchivoInicial;
-    private JEditorPane txtArchivoProcesado;
+    private JTextArea txtArchivoProcesado;
     private JLabel lblPosicionInicial;
 
     private JTextArea txtSalidaMensajes;
@@ -51,8 +51,7 @@ public class EditorFrame extends JFrame {
         listComponentes.setBackground(Color.WHITE);
         btnCargarArchivoInicial = new JButton("Cargar Archivo");
         txtArchivoInicial = buildTextArea();
-        txtArchivoProcesado = new JEditorPane();
-        txtArchivoProcesado.setContentType("text/html");
+        txtArchivoProcesado = buildTextArea();
         txtArchivoProcesado.setEditable(false);
         lblPosicionInicial = new JLabel("ln 1, col 1");
         lblPosicionInicial.setFont(new Font("Monospaced", Font.PLAIN, 11));
@@ -216,11 +215,7 @@ public class EditorFrame extends JFrame {
             listComponentes.setSelectedIndex(listModel.size() - 1);
         });
 
-        controller.setOnPluginExecuted(result -> {
-            txtArchivoProcesado.setContentType(
-                    result.trim().startsWith("<") ? "text/html" : "text/plain");
-            txtArchivoProcesado.setText(result);
-        });
+        controller.setOnPluginExecuted(txtArchivoProcesado::setText);
 
         controller.setOnFileLoaded(content -> {
             txtArchivoInicial.setText(content);

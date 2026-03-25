@@ -103,6 +103,12 @@ public class EditorController {
     }
 
     private void notifyError(String title, String message) {
+        String errorMessage = "Error: " + message;
+        if (kernel.getMessageBus() != null) {
+            kernel.getMessageBus().publish(errorMessage);
+        } else {
+            notify(onStatusMessage, errorMessage);
+        }
         if (onError != null) onError.accept(title, message);
     }
 
