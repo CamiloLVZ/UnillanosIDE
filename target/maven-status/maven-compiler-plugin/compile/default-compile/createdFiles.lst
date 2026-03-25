@@ -1,0 +1,9 @@
+com\unillanos\editor\core\Microkernel.class
+com\unillanos\editor\ioc\PluginLoadException.class
+com\unillanos\editor\Main.class
+com\unillanos\editor\core\MessageBus.class
+com\unillanos\editor\ui\EditorFrame$1.class
+com\unillanos\editor\ui\LineNumberComponent$1.class
+com\unillanos\editor\ui\LineNumberComponent.class
+com\unillanos\editor\ui\EditorFrame.class
+com\unillanos\editor\ioc\IoCContainer.class
