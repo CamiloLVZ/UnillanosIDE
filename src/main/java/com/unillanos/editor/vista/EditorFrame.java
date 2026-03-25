@@ -10,6 +10,7 @@ import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 public class EditorFrame extends JFrame {
 
@@ -22,10 +23,10 @@ public class EditorFrame extends JFrame {
 
     private JButton btnCargarArchivoInicial;
     private JTextArea txtArchivoInicial;
-    private JEditorPane txtArchivoProcesado;
+    private JTextArea txtArchivoProcesado;
     private JLabel lblPosicionInicial;
 
-    private JTextField txtSalidaMensajes;
+    private JTextArea txtSalidaMensajes;
 
     public EditorFrame(EditorController controller) {
         this.controller = controller;
@@ -50,13 +51,13 @@ public class EditorFrame extends JFrame {
         listComponentes.setBackground(Color.WHITE);
         btnCargarArchivoInicial = new JButton("Cargar Archivo");
         txtArchivoInicial = buildTextArea();
-        txtArchivoProcesado = new JEditorPane();
-        txtArchivoProcesado.setContentType("text/html");
+        txtArchivoProcesado = buildTextArea();
         txtArchivoProcesado.setEditable(false);
         lblPosicionInicial = new JLabel("ln 1, col 1");
         lblPosicionInicial.setFont(new Font("Monospaced", Font.PLAIN, 11));
         lblPosicionInicial.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
-        txtSalidaMensajes = new JTextField();
+
+        txtSalidaMensajes = buildTextArea();
         txtSalidaMensajes.setEditable(false);
         txtSalidaMensajes.setBackground(Color.WHITE);
     }
@@ -130,7 +131,9 @@ public class EditorFrame extends JFrame {
 
         JPanel pProcesado = titledPanel("Archivo procesado", bg);
         pProcesado.setLayout(new BorderLayout());
-        pProcesado.add(new JScrollPane(txtArchivoProcesado), BorderLayout.CENTER);
+        JScrollPane scrollProcesado = new JScrollPane(txtArchivoProcesado);
+        scrollProcesado.setRowHeaderView(new LineNumberComponent(txtArchivoProcesado));
+        pProcesado.add(scrollProcesado, BorderLayout.CENTER);
 
         panel.add(pInicial);
         panel.add(pProcesado);
@@ -140,7 +143,10 @@ public class EditorFrame extends JFrame {
     private JPanel buildBottomPanel(Color bg) {
         JPanel panel = titledPanel("Salida de mensajes", bg);
         panel.setLayout(new BorderLayout());
-        panel.add(txtSalidaMensajes, BorderLayout.CENTER);
+        JScrollPane scrollMensajes = new JScrollPane(txtSalidaMensajes);
+        scrollMensajes.setPreferredSize(new Dimension(0, 120));
+        scrollMensajes.setRowHeaderView(new LineNumberComponent(txtSalidaMensajes));
+        panel.add(scrollMensajes, BorderLayout.CENTER);
         return panel;
     }
 
@@ -209,24 +215,30 @@ public class EditorFrame extends JFrame {
             listComponentes.setSelectedIndex(listModel.size() - 1);
         });
 
-        controller.setOnPluginExecuted(result -> {
-            txtArchivoProcesado.setContentType(
-                    result.trim().startsWith("<") ? "text/html" : "text/plain");
-            txtArchivoProcesado.setText(result);
-        });
+        controller.setOnPluginExecuted(txtArchivoProcesado::setText);
 
         controller.setOnFileLoaded(content -> {
             txtArchivoInicial.setText(content);
             txtArchivoInicial.setCaretPosition(0);
         });
 
-        controller.setOnError((title, msg) -> SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(this, msg, title, JOptionPane.ERROR_MESSAGE);
-            txtSalidaMensajes.setText("Error: " + msg);
-        }));
+        controller.setOnError((title, msg) -> SwingUtilities.invokeLater(() ->
+                JOptionPane.showMessageDialog(this, msg, title, JOptionPane.ERROR_MESSAGE)));
 
-        controller.setOnStatusMessage(msg ->
-                SwingUtilities.invokeLater(() -> txtSalidaMensajes.setText(msg)));
+        controller.setOnStatusMessage(msg -> SwingUtilities.invokeLater(() -> appendStatusMessage(msg)));
+
+        List<String> historialMensajes = controller.getMessageHistory();
+        for (int i = 0; i < historialMensajes.size(); i++) {
+            appendStatusMessage(historialMensajes.get(i));
+        }
+    }
+
+    private void appendStatusMessage(String message) {
+        if (txtSalidaMensajes.getDocument().getLength() > 0) {
+            txtSalidaMensajes.append("\n");
+        }
+        txtSalidaMensajes.append(message);
+        txtSalidaMensajes.setCaretPosition(txtSalidaMensajes.getDocument().getLength());
     }
 
     private void updateCaretPosition(JTextComponent textComponent, JLabel label) {
